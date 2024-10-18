@@ -1,11 +1,14 @@
 # Importa a classe Flask do módulo flask
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, json, make_response, redirect, render_template, request, url_for
 # Importa a bilbioteca de acesso ao MySQL
 from flask_mysqldb import MySQL
 # Importa todas funções dos artigos de `db_articles`
 from functions.db_articles import *
 from functions.db_comments import *
 from functions.db_contacts import save_contact
+# Importa funções de manipulação do tempo
+from datetime import datetime, timedelta
+
 
 # Cria uma instância da aplicação Flask
 app = Flask(__name__)
@@ -105,7 +108,7 @@ def view(artid):
         'articles': articles,   # Lista de outros artigos do autor
         'action': ac,           # Feedback de envio do comentário
         'comments': comments,   # Todos os comentários deste artigo
-        'total_comments': total_comments # Total de comentários
+        'total_comments': total_comments  # Total de comentários
     }
 
     return render_template('view.html', page=toPage)
@@ -131,6 +134,7 @@ def contacts():  # Função executada quando '/contacts' é acessado
         # print('\n\n\n', form, '\n\n\n')
 
         # Salva contato no banco de dados
+        # Cria um cookie com 'name' e 'email'
         success = save_contact(mysql, form)
 
         # Obtém o primeiro nome do remetente
@@ -144,10 +148,23 @@ def contacts():  # Função executada quando '/contacts' é acessado
         'first': first
     }
 
-    print('\n\n\n', toPage, '\n\n\n')
+    # print('\n\n\n', toPage, '\n\n\n')
 
-    # Retorna uma mensagem simples
-    return render_template('contacts.html', page=toPage)
+    # Renderiza a página
+    resp = make_response(render_template('contacts.html', page=toPage))
+
+    # Cria cookie com dados do usuário se o form foi enviado
+    if success:
+        # Dados para o cookie
+        cookie_data = {
+            'name': form['name'],
+            'email': form['email']
+        }
+        # Data em que o cookie expira
+        expires = datetime.now() + timedelta(days=365)
+        resp.set_cookie('user_data', json.dumps(cookie_data), expires=expires)
+
+    return resp
 
 
 @app.errorhandler(404)  # Manipula o erro 404
