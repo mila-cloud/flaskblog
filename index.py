@@ -209,12 +209,37 @@ def contacts():  # Função executada quando '/contacts' é acessado
     return resp
 
 
+@app.route('/search')
+def search():
+    query = request.args.get('q')
+
+    # print('\n\n\n', query, '\n\n\n')
+
+    articles = search_articles(mysql, query)
+    article_viewed = most_viewed(mysql)
+
+    total = len(articles)
+
+    print('\n\n\n', articles, '\n\n\n')
+
+    toPage = {
+        'title': 'Procurar',
+        'css': 'home.css',
+        'articles': articles,
+        'query': query,
+        'total': total,
+        'article_viewed': article_viewed
+    }
+
+    return render_template('search.html', page=toPage)
+
+
 @app.errorhandler(404)  # Manipula o erro 404
 def page_not_found(e):
 
     articles = get_all(mysql, 4)
 
-    print('\n\n\n', articles, '\n\n\n')
+    # print('\n\n\n', articles, '\n\n\n')
 
     toPage = {
         'title': 'Erro 404',
@@ -251,6 +276,24 @@ def comment():
 
     # Retorna para a visualização do artigo
     return resp
+
+
+@app.route('/about')
+def about():
+    toPage = {
+        'title': 'Sobre',
+        'css': 'about.css'
+    }
+    return render_template('/about.html', page=toPage)
+
+
+@app.route('/policies')
+def policies():
+    toPage = {
+        'title': 'Políticas de Privacidade',
+        'css': 'about.css'
+    }
+    return render_template('/policies.html', page=toPage)
 
 
 # Verifica se o script está sendo executado diretamente
