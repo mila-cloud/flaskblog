@@ -1,9 +1,14 @@
 from flask_mysqldb import MySQLdb
 
 
-def get_all(mysql):
+def get_all(mysql, limit=0):
 
-    sql = '''
+    if limit == 0:
+        subsql = ''
+    else:
+        subsql = f'LIMIT {limit}'
+
+    sql = f'''
         -- Recebe a lista de artigos do banco de dados:
         --  A) Somente os campos necessários
         --  B) Somente artigos online
@@ -12,13 +17,14 @@ def get_all(mysql):
 
         -- A --
         SELECT art_id, art_title, art_resume, art_thumbnail
-        FROM `article` 
+        FROM `article`
         -- B --
         WHERE art_status = 'on'
         -- C --
             AND art_date <= NOW()
         -- D --
-        ORDER BY art_date DESC;
+        ORDER BY art_date DESC
+        {subsql}
     '''
     cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute(sql)
@@ -58,7 +64,7 @@ def get_one(mysql, artid):  # Obtém 1 artigo pelo id com os dados do autor
     return article
 
 
-def get_by_author(mysql, staid, artid, limit=4): # Obtém as artigos do author
+def get_by_author(mysql, staid, artid, limit=4):  # Obtém as artigos do author
 
     sql = '''
         SELECT art_id, art_title, art_thumbnail 
@@ -77,7 +83,8 @@ def get_by_author(mysql, staid, artid, limit=4): # Obtém as artigos do author
 
     return articles
 
-def update_views(mysql, artid): # Atualiza as visualizações do artigo
+
+def update_views(mysql, artid):  # Atualiza as visualizações do artigo
 
     sql = '''
         UPDATE article 
@@ -92,7 +99,7 @@ def update_views(mysql, artid): # Atualiza as visualizações do artigo
     return True
 
 
-def most_viewed(mysql, limit = 4): # Os artigos mais visualizados
+def most_viewed(mysql, limit=4):  # Os artigos mais visualizados
 
     sql = '''
         SELECT art_id, art_title, art_thumbnail
@@ -109,7 +116,8 @@ def most_viewed(mysql, limit = 4): # Os artigos mais visualizados
 
     return articles
 
-def most_commented(mysql, limit=4): # Os artigos mais comentados
+
+def most_commented(mysql, limit=4):  # Os artigos mais comentados
     sql = '''
         SELECT 
             a.art_id, 

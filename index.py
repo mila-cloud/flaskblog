@@ -211,9 +211,15 @@ def contacts():  # Função executada quando '/contacts' é acessado
 
 @app.errorhandler(404)  # Manipula o erro 404
 def page_not_found(e):
+
+    articles = get_all(mysql, 4)
+
+    print('\n\n\n', articles, '\n\n\n')
+
     toPage = {
         'title': 'Erro 404',
-        'css': '404.css'
+        'css': '404.css',
+        'articles': articles
     }
     return render_template('404.html', page=toPage), 404
 
@@ -231,7 +237,8 @@ def comment():
     save_comment(mysql, form)
 
     # Renderiza a página
-    resp = make_response(redirect(url_for('view', artid=form['id'], ac='commented') + '#comments'))
+    resp = make_response(
+        redirect(url_for('view', artid=form['id'], ac='commented') + '#comments'))
 
     # Dados para o cookie
     cookie_data = {
@@ -250,16 +257,3 @@ def comment():
 if __name__ == '__main__':
     # Inicia o servidor Flask em modo debug
     app.run(debug=True)
-
-
-'''
-@app.route('/get_cookie')
-def get_cookie():
-    cookie_data = request.cookies.get('meu_cookie')
-    if cookie_data:
-        # Converte a string JSON de volta para um dicionário
-        data = json.loads(cookie_data)
-        return f"Nome: {data['name']}, Email: {data['email']}"
-    else:
-        return "Cookie não encontrado!"
-'''
