@@ -280,18 +280,28 @@ def comment():
 
 @app.route('/about')
 def about():
+
+    articles = get_all(mysql, 4)
+
+    # print('\n\n\n', articles, '\n\n\n')
+
     toPage = {
         'title': 'Sobre',
-        'css': 'about.css'
+        'css': 'about.css',
+        'articles': articles
     }
     return render_template('/about.html', page=toPage)
 
 
 @app.route('/policies')
 def policies():
+
+    articles = get_random(mysql)
+
     toPage = {
         'title': 'Políticas de Privacidade',
-        'css': 'about.css'
+        'css': 'about.css',
+        'articles': articles
     }
     return render_template('/policies.html', page=toPage)
 
@@ -300,3 +310,5 @@ def policies():
 if __name__ == '__main__':
     # Inicia o servidor Flask em modo debug
     app.run(debug=True)
+
+
